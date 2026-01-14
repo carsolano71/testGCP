@@ -3,25 +3,26 @@ from airflow.providers.google.cloud.operators.bigquery import BigQueryInsertJobO
 from datetime import datetime
 from pathlib import Path
 
-SQL_PATH = Path(__file__).parents[2] / "sql" / "silver" / "example.sql"
+# Ruta al SQL de Silver
+SQL_PATH = Path(__file__).parents[2] / "sql" / "silver" / "customers_silver.sql"
 
 with DAG(
-    dag_id="example_silver_dag",
+    dag_id="customers_silver_dag",
     start_date=datetime(2024, 1, 1),
-    schedule_interval=None,
+    schedule_interval=None,  # ejecución manual (ideal para pruebas)
     catchup=False,
-    tags=["example", "silver"],
+    tags=["silver", "customers"],
 ) as dag:
 
-    run_sql = BigQueryInsertJobOperator(
-        task_id="run_example_sql",
+    run_customers_silver = BigQueryInsertJobOperator(
+        task_id="run_customers_silver_sql",
         configuration={
             "query": {
                 "query": SQL_PATH.read_text(),
                 "useLegacySql": False,
             }
         },
-        location="US",  # ajusta a tu región
+        location="US",  # usa la región de tu BigQuery
     )
 
-    run_sql
+    run_customers_silver
