@@ -3,7 +3,10 @@ from airflow.providers.google.cloud.operators.bigquery import BigQueryInsertJobO
 from datetime import datetime
 from pathlib import Path
 
+<<<<<<< HEAD
 # Ruta al SQL
+=======
+>>>>>>> 2963c59 (Add silver DAG for customers)
 SQL_PATH = Path(__file__).parents[2] / "sql" / "silver" / "customers.sql"
 
 with DAG(
@@ -25,4 +28,10 @@ with DAG(
                 "writeDisposition": "WRITE_TRUNCATE",
             }
         },
+<<<<<<< HEAD
     )
+=======
+        location="US",
+    )
+
+>>>>>>> 2963c59 (Add silver DAG for customers)
