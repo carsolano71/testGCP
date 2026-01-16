@@ -1,37 +1,46 @@
 from airflow import DAG
 from airflow.providers.google.cloud.operators.bigquery import BigQueryInsertJobOperator
+from airflow.models import Variable
 from datetime import datetime
-from pathlib import Path
 
-<<<<<<< HEAD
-# Ruta al SQL
-=======
->>>>>>> 2963c59 (Add silver DAG for customers)
-SQL_PATH = Path(__file__).parents[2] / "sql" / "silver" / "customers.sql"
+# =========================
+# CONFIGURACIÓN
+# =========================
+PROJECT_ID = "my-project-cash-new"
+BQ_LOCATION = "US"
 
+# Bucket de Composer (defínelo como Variable en Airflow)
+# Ejemplo de valor:
+# us-central1-composer-poc-ca-0090c6dc-bucket
+COMPOSER_BUCKET = Variable.get("COMPOSER_BUCKET")
+
+# Ruta del SQL en GCS
+SQL_GCS_PATH = (
+    f"gs://{COMPOSER_BUCKET}/dags/sql/silver/customers.sql"
+)
+
+# =========================
+# DAG
+# =========================
 with DAG(
-    dag_id="example_silver_dag",
+    dag_id="example_customers_silver",
     start_date=datetime(2024, 1, 1),
-    schedule_interval=None,
+    schedule_interval=None,  # manual (ideal para pruebas)
     catchup=False,
-    tags=["bronze-to-silver", "customers", "silver"],
+    tags=["silver", "customers", "bigquery"],
 ) as dag:
 
-    run_customers_silver = BigQueryInsertJobOperator(
-        task_id="run_customers_silver",
-        project_id="my-project-cash-new",
-        location="US",
+    load_customers_silver = BigQueryInsertJobOperator(
+        task_id="load_customers_silver",
         configuration={
             "query": {
-                "query": SQL_PATH.read_text(),
+                # BigQuery lee el SQL directamente desde GCS
+                "query": f"{{% include '{SQL_GCS_PATH}' %}}",
                 "useLegacySql": False,
-                "writeDisposition": "WRITE_TRUNCATE",
             }
         },
-<<<<<<< HEAD
-    )
-=======
-        location="US",
+        location=BQ_LOCATION,
+        project_id=PROJECT_ID,
     )
 
->>>>>>> 2963c59 (Add silver DAG for customers)
+    load_customers_silver
